@@ -1,12 +1,17 @@
-# load packages and define global variables
-
-library(tidyverse)
-library(fredr)
-library(zoo)
-
-## ------------------------------------------  WEATHER API  ---------------------------------------------------
-
-# get_daily_weather: fetches hourly Open-Meteo CSV and returns daily summary
+#' Get Daily Weather Data
+#'
+#' Fetches hourly weather data from Open-Meteo and aggregates it to daily summaries.
+#'
+#' @param start Character string. Start date in 'YYYY-MM-DD' format.
+#' @param end Character string. End date in 'YYYY-MM-DD' format.
+#' @param lat Numeric. Latitude.
+#' @param lon Numeric. Longitude.
+#'
+#' @return A data frame with Date, avg_temp, max_temp, and tot_rain.
+#' @importFrom utils read.csv
+#' @importFrom stats aggregate
+#' @importFrom dplyr left_join
+#' @export
 get_daily_weather <- function(start, end, lat, lon) {
   
   # Validate inputs to ensure all required geographic and temporal parameters are present
@@ -67,12 +72,22 @@ get_daily_weather <- function(start, end, lat, lon) {
   return(result)
 }
 
-# daily_weather_data <- get_daily_weather('2026-01-01','2026-01-15', lat=51.5074, lon=-0.1278)
-# daily_weather_data
-
-## ----------------------------------------  ECONOMIC API  --------------------------------------------------
-
-# get_daily_economic_data: fetches economic data
+#' Get Daily Economic Data
+#'
+#' Fetches economic indicators from FRED and aggregates/fills them to daily frequency.
+#'
+#' @param start Character string. Start date in 'YYYY-MM-DD' format.
+#' @param end Character string. End date in 'YYYY-MM-DD' format.
+#' @param lat Numeric. Latitude (not used, kept for API consistency).
+#' @param lon Numeric. Longitude (not used, kept for API consistency).
+#'
+#' @return A data frame with daily economic indicators.
+#' @importFrom fredr fredr fredr_set_key
+#' @importFrom purrr map_dfr
+#' @importFrom tidyr pivot_wider
+#' @importFrom zoo na.locf
+#' @importFrom dplyr select arrange left_join mutate across rename_with
+#' @export
 get_daily_economic_data <- function(start, end, lat, lon) {
   
   # Input validation
@@ -137,12 +152,19 @@ get_daily_economic_data <- function(start, end, lat, lon) {
   return(result)
 }
 
-# econ_data <- get_daily_economic_data('2026-01-01','2026-01-15', lat=51.5074, lon=-0.1278)
-# tail(econ_data)
-
-# ---------------------------------------------- NEWS API ----------------------------------------------------
-
-# Helper function to call GDELT API
+#' Get GDELT Timeline Data
+#'
+#' Fetches sentiment tone timeline from GDELT API.
+#'
+#' @param query_text Character string. Query text for GDELT.
+#' @param out_col Character string. Name of the output column for the score.
+#' @param start Character string. Start date.
+#' @param end Character string. End date.
+#'
+#' @return A data frame with Date and the requested score column.
+#' @importFrom utils URLencode read.csv
+#' @importFrom dplyr transmute group_by summarise rename left_join
+#' @export
 gdelt_timeline_daily <- function(query_text, out_col, start, end) {
   
   # clean the dates format
@@ -151,9 +173,6 @@ gdelt_timeline_daily <- function(query_text, out_col, start, end) {
   
   # Create spine first to ensure safe return
   spine <- data.frame(date = seq(as.Date(start), as.Date(end), by = "day"))
-  
-  # Define success flag
-  success <- FALSE
   
   result <- tryCatch({
     # call API
@@ -196,8 +215,6 @@ gdelt_timeline_daily <- function(query_text, out_col, start, end) {
     return(out)
     
   }, error = function(e) {
-    # If it's just empty data, it might be expected. Print warning vs error?
-    # Requirement is "useful error messages".
     message("Warning/Error in gdelt_timeline_daily for query '", query_text, "': ", e$message)
     spine[[out_col]] <- NA_real_
     return(spine)
@@ -206,8 +223,17 @@ gdelt_timeline_daily <- function(query_text, out_col, start, end) {
   return(result)
 }
 
-# ---------------------------------------------- MERGE -------------------------------------------------------
-
+#' Get Macroeconomic Data
+#'
+#' Orchestrates the fetching and merging of weather, economic, and political/disaster data.
+#'
+#' @param start_date Character string. Start date.
+#' @param end_date Character string. End date.
+#' @param latitude Numeric. Latitude.
+#' @param longitude Numeric. Longitude.
+#'
+#' @return A merged data frame containing all indicators.
+#' @export
 get_macroeconomic_data <- function(start_date, end_date, latitude, longitude) {
   
   # get daily weather data
@@ -252,8 +278,4 @@ get_macroeconomic_data <- function(start_date, end_date, latitude, longitude) {
     )
   
   return(merged_df)
-  
 }
-
-# sample = get_macroeconomic_data('2026-01-01','2026-01-15', lat=51.5074, lon=-0.1278)
-# sample
