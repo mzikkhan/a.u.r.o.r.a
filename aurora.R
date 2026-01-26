@@ -14,47 +14,57 @@ get_daily_weather <- function(start, end, lat, lon) {
     stop("Please provide start, end, lat and lon. Example: get_daily_weather('2026-01-01','2026-01-15', lat=51.5074, lon=-0.1278)")
   }
   
-  # 1. CALL API
-  # Construct the API request URL for Open-Meteo.
-  # Note: Requesting 'temperature_2m' and 'precipitation' at hourly intervals to allow for custom daily aggregation later.
-  # timezone=auto ensures the data aligns with local time rather than UTC, which is crucial for daily aggregation correctness.
-  url <- paste0("https://api.open-meteo.com/v1/forecast?",
-                "latitude=", lat, "&longitude=", lon,
-                "&start_date=", start, "&end_date=", end,
-                "&hourly=temperature_2m,precipitation",
-                "&timezone=auto",                        
-                "&format=csv")
+  # Create a spine sequence of dates to ensure we can return a valid structure even on failure
+  spine <- data.frame(date = seq(as.Date(start), as.Date(end), by = "day"))
   
-  # 2. Read and Clean Data
-  # The Open-Meteo CSV format includes metadata headers in the first ~10 lines. 
-  # We skip these to reach the actual data table.
-  weather_data <- read.csv(url, skip = 10, header = FALSE)
-  
-  # Manually assign column names since we skipped the header row.
-  colnames(weather_data) <- c("datetime", "temp_c", "precip_mm")
-  
-  # Convert ISO8601 string to POSIXct for time manipulation, then extract just the Date component.
-  weather_data$datetime <- as.POSIXct(weather_data$datetime, format="%Y-%m-%dT%H:%M")
-  weather_data$date <- as.Date(weather_data$datetime)
-  
-  # 4. Calculate stats
-  # Aggregate hourly rows into single daily rows.
-  # We use a custom anonymous function to extract mean, max, and sum in a single pass.
-  # This creates a matrix column for each variable in the resulting dataframe.
-  daily_summary <- aggregate(cbind(temp_c, precip_mm) ~ date, 
-                             data = weather_data, 
-                             FUN = function(x) c(mean = mean(x), max = max(x), sum = sum(x)))
-  
-  # 5. Clean up the messy matrix output from aggregate
-  # The 'aggregate' function returns columns of class 'matrix'.
-  daily_summary <- data.frame(
-    date      = daily_summary$date,
-    avg_temp  = round(daily_summary$temp_c[, "mean"], 1),
-    max_temp  = daily_summary$temp_c[, "max"],
-    tot_rain  = daily_summary$precip_mm[, "sum"]
-  )
-  
-  return(daily_summary)
+  result <- tryCatch({
+    # 1. CALL API
+    # Construct the API request URL for Open-Meteo.
+    url <- paste0("https://api.open-meteo.com/v1/forecast?",
+                  "latitude=", lat, "&longitude=", lon,
+                  "&start_date=", start, "&end_date=", end,
+                  "&hourly=temperature_2m,precipitation",
+                  "&timezone=auto",                        
+                  "&format=csv")
+    
+    # 2. Read and Clean Data
+    # The Open-Meteo CSV format includes metadata headers in the first ~10 lines. 
+    weather_data <- read.csv(url, skip = 10, header = FALSE)
+    
+    # Manually assign column names since we skipped the header row.
+    colnames(weather_data) <- c("datetime", "temp_c", "precip_mm")
+    
+    # Convert ISO8601 string to POSIXct for time manipulation
+    weather_data$datetime <- as.POSIXct(weather_data$datetime, format="%Y-%m-%dT%H:%M")
+    weather_data$date <- as.Date(weather_data$datetime)
+    
+    # 4. Calculate stats
+    daily_summary <- aggregate(cbind(temp_c, precip_mm) ~ date, 
+                               data = weather_data, 
+                               FUN = function(x) c(mean = mean(x), max = max(x), sum = sum(x)))
+    
+    # 5. Clean up the messy matrix output from aggregate
+    daily_summary <- data.frame(
+      date      = daily_summary$date,
+      avg_temp  = round(daily_summary$temp_c[, "mean"], 1),
+      max_temp  = daily_summary$temp_c[, "max"],
+      tot_rain  = daily_summary$precip_mm[, "sum"]
+    )
+    
+    # Ensure all dates in range are present (though API usually returns full range)
+    out <- spine %>% left_join(daily_summary, by = "date")
+    return(out)
+    
+  }, error = function(e) {
+    message("Error in get_daily_weather: ", e$message)
+    # Return spine with NAs for data columns
+    spine$avg_temp <- NA
+    spine$max_temp <- NA
+    spine$tot_rain <- NA
+    return(spine)
+  })
+
+  return(result)
 }
 
 # daily_weather_data <- get_daily_weather('2026-01-01','2026-01-15', lat=51.5074, lon=-0.1278)
@@ -65,56 +75,66 @@ get_daily_weather <- function(start, end, lat, lon) {
 # get_daily_economic_data: fetches economic data
 get_daily_economic_data <- function(start, end, lat, lon) {
   
-  # Input validation (Note: lat/lon aren't used here but kept for signature consistency across fetchers)
+  # Input validation
   if (is.null(lat) || missing(lon) || is.null(start) || is.null(end)) {
     stop("Please provide start, end, lat and lon. Example: get_daily_economic_data('2026-01-01','2026-01-15', lat=51.5074, lon=-0.1278)")
   }
   
-  # Set API key
-  fred_api_key <- '1f52a3bcb927a3a2423a9a2e78bd1261'
-  fredr_set_key(fred_api_key)
+  result <- tryCatch({
+    # Set API key
+    fred_api_key <- '1f52a3bcb927a3a2423a9a2e78bd1261'
+    fredr_set_key(fred_api_key)
+    
+    # 1. Define the parameters
+    indicators <- c(
+      "Interest_Rate"     = "DFF",          # Daily
+      "Mortgage_Rate"     = "MORTGAGE30US", # Weekly
+      "Unemployment"      = "UNRATE",       # Monthly
+      "CPI_Inflation"     = "CPIAUCSL",     # Monthly
+      "GDP"               = "GDPC1",        # Quarterly
+      "Public_Debt"       = "GFDEBTN"       # Quarterly
+    )
+    
+    # 2. Fetch all data at once 
+    raw_data <- map_dfr(indicators, 
+                        ~fredr(series_id = .x, observation_start = as.Date("2020-01-01")), 
+                        .id = "metric")
+    
+    # 3. Pivot to Wide Format 
+    daily_trend <- raw_data %>%
+      select(date, metric, value) %>%
+      pivot_wider(names_from = metric, values_from = value) %>%
+      arrange(date)
+    
+    # 4. The "Fill" Step (LOCF)
+    # Create complete sequence of daily dates covering the requested range (or data range)
+    # To be safe, we use the requested range here to ensure consistent return.
+    full_dates <- data.frame(date = seq(as.Date(start), as.Date(end), by="day"))
+    
+    # 5. Keep only daily records
+    econ_daily_fixed <- full_dates %>%
+      left_join(daily_trend, by = "date") %>%
+      mutate(across(-date, ~na.locf(., na.rm = FALSE))) %>% 
+      rename_with(tolower)
+    
+    return(econ_daily_fixed)
+    
+  }, error = function(e) {
+    message("Error in get_daily_economic_data: ", e$message)
+    # Return spine with NAs
+    full_dates <- data.frame(date = seq(as.Date(start), as.Date(end), by="day"))
+    
+    # List of expected columns (lowercase) based on indicators
+    expected_cols <- c("interest_rate", "mortgage_rate", "unemployment", 
+                       "cpi_inflation", "gdp", "public_debt")
+    
+    for(col in expected_cols) {
+      full_dates[[col]] <- NA_real_
+    }
+    return(full_dates)
+  })
   
-  # 1. Define the parameters and their frequencies
-  # We map friendly names (keys) to FRED Series IDs (values).
-  # Important: These series have mixed frequencies (Daily, Weekly, Monthly, Quarterly)
-  indicators <- c(
-    "Interest_Rate"     = "DFF",          # Daily
-    "Mortgage_Rate"     = "MORTGAGE30US", # Weekly
-    "Unemployment"      = "UNRATE",       # Monthly
-    "CPI_Inflation"     = "CPIAUCSL",     # Monthly
-    "GDP"               = "GDPC1",        # Quarterly
-    "Public_Debt"       = "GFDEBTN"       # Quarterly
-  )
-  
-  # 2. Fetch all data at once 
-  # Use map_dfr to iterate over the vector of series IDs, fetch them via fredr(),
-  # and bind them into a single long-format dataframe.
-  # The .id argument preserves the friendly name in the 'metric' column.
-  raw_data <- map_dfr(indicators, 
-                      ~fredr(series_id = .x, observation_start = as.Date("2020-01-01")), 
-                      .id = "metric")
-  
-  # 3. Pivot to Wide Format 
-  # Transform from Long (Metric, Date, Value) to Wide so each economic indicator has its own column.
-  daily_trend <- raw_data %>%
-    select(date, metric, value) %>%
-    pivot_wider(names_from = metric, values_from = value) %>%
-    arrange(date)
-  
-  # 4. The "Fill" Step (LOCF)
-  # Create a complete sequence of daily dates covering the entire range.
-  # This ensures we have rows even for days where no data was reported.
-  full_dates <- data.frame(date = seq(min(daily_trend$date), max(daily_trend$date), by="day"))
-  
-  # 5. Keep only daily records
-  # Join the actual data to the full date sequence.
-  # Use na.locf (Last Observation Carried Forward) to propagate values for lower-frequency data.
-  econ_daily_fixed <- full_dates %>%
-    left_join(daily_trend, by = "date") %>%
-    mutate(across(-date, ~na.locf(., na.rm = FALSE))) %>% 
-    rename_with(tolower)
-  
-  return(econ_daily_fixed)
+  return(result)
 }
 
 # econ_data <- get_daily_economic_data('2026-01-01','2026-01-15', lat=51.5074, lon=-0.1278)
@@ -126,64 +146,64 @@ get_daily_economic_data <- function(start, end, lat, lon) {
 gdelt_timeline_daily <- function(query_text, out_col, start, end) {
   
   # clean the dates format
-  # GDELT requires strict 14-digit datetime strings (YYYYMMDDHHMMSS).
-  # We convert standard YYYY-MM-DD inputs to this format.
   startdt <- paste0(gsub("-", "", start), "000000")
   enddt   <- paste0(gsub("-", "", end),   "235959")
   
-  # call API
-  # Use TimelineTone mode to get sentiment scores over time.
-  # URLencode is critical to handle spaces and special chars in the query_text safely.
-  url <- paste0("https://api.gdeltproject.org/api/v2/doc/doc?",
-                "query=", URLencode(query_text),
-                "&mode=TimelineTone",
-                "&format=CSV",
-                "&startdatetime=", startdt,
-                "&enddatetime=", enddt)
-  
-  # retrieve data
-  # Wrap in try() because GDELT often returns 400/500 errors or malformed CSVs if the query finds no hits.
-  # silent = TRUE prevents console clutter on failure.
-  raw <- try(read.csv(url, check.names = FALSE), silent = TRUE)
-  
-  # if no data or error -> return spine with NA column
-  # We construct a "spine" (empty dataframe with just dates) to ensure the function always returns 
-  # a compatible dataframe, even if the API fails, preventing downstream joins from breaking.
+  # Create spine first to ensure safe return
   spine <- data.frame(date = seq(as.Date(start), as.Date(end), by = "day"))
-  if (inherits(raw, "try-error") || is.null(raw) || nrow(raw) == 0) {
+  
+  # Define success flag
+  success <- FALSE
+  
+  result <- tryCatch({
+    # call API
+    url <- paste0("https://api.gdeltproject.org/api/v2/doc/doc?",
+                  "query=", URLencode(query_text),
+                  "&mode=TimelineTone",
+                  "&format=CSV",
+                  "&startdatetime=", startdt,
+                  "&enddatetime=", enddt)
+    
+    # retrieve data
+    # Use suppressWarnings because GDELT might emit warnings on empty results
+    raw <- suppressWarnings(read.csv(url, check.names = FALSE))
+    
+    if (is.null(raw) || nrow(raw) == 0) {
+      stop("GDELT returned empty data")
+    }
+    
+    # try to detect the date + value cols
+    cn <- names(raw)
+    date_col <- cn[grepl("date", tolower(cn))][1]
+    val_col  <- cn[grepl("value|tone|count", tolower(cn))][1]
+    
+    if (is.na(date_col) || is.na(val_col)) {
+      stop("GDELT returned unrecognizable columns")
+    }
+    
+    # clean data
+    daily <- raw %>%
+      transmute(
+        date = as.Date(.data[[date_col]]),
+        score = as.numeric(.data[[val_col]])
+      ) %>%
+      group_by(date) %>%
+      summarise(score = mean(score, na.rm = TRUE), .groups = "drop") %>%
+      rename(!!out_col := score)
+    
+    # Join back to spine
+    out <- spine %>% left_join(daily, by = "date")
+    return(out)
+    
+  }, error = function(e) {
+    # If it's just empty data, it might be expected. Print warning vs error?
+    # Requirement is "useful error messages".
+    message("Warning/Error in gdelt_timeline_daily for query '", query_text, "': ", e$message)
     spine[[out_col]] <- NA_real_
     return(spine)
-  }
+  })
   
-  # try to detect the date + value cols
-  # GDELT column names can be inconsistent
-  # Regex matching is used to dynamically identify the correct column indices.
-  cn <- names(raw)
-  date_col <- cn[grepl("date", tolower(cn))][1]
-  val_col  <- cn[grepl("value|tone|count", tolower(cn))][1]
-  
-  # search for valid dates and values
-  # If we cannot identify the columns via regex, fallback to returning NAs.
-  if (is.na(date_col) || is.na(val_col)) {
-    spine[[out_col]] <- NA_real_
-    return(spine)
-  }
-  
-  # clean data
-  # Parse the date string, coerce the value to numeric, and aggregate by mean.
-  # The aggregation protects against duplicate entries for the same day.
-  # Dynamic renaming (!!out_col := score) allows this function to be reused for different metrics.
-  daily <- raw %>%
-    transmute(
-      date = as.Date(.data[[date_col]]),
-      score = as.numeric(.data[[val_col]])
-    ) %>%
-    group_by(date) %>%
-    summarise(score = mean(score, na.rm = TRUE), .groups = "drop") %>%
-    rename(!!out_col := score)
-  
-  # Join the calculated data back to the date spine to ensure no days are missing from the sequence.
-  spine %>% left_join(daily, by = "date")
+  return(result)
 }
 
 # ---------------------------------------------- MERGE -------------------------------------------------------
