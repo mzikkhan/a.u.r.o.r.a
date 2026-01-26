@@ -1,0 +1,54 @@
+---
+title: "Analyzing Macroeconomic Trends with Aurora"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Analyzing Macroeconomic Trends with Aurora}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+## Introduction
+
+The `aurora` package allows you to easily fetch and align disparate data sources—weather, economics, and events—into a single daily timeline.
+
+## Usage
+
+```{r setup}
+library(aurora)
+```
+
+### Fetching Data
+
+You can fetch a comprehensive dataset for a specific location and date range. Here we look at Ottawa, Canada for January 2024.
+
+```{r fetch, eval = FALSE}
+# Fetches data from Open-Meteo, FRED, and GDELT
+data <- get_macroeconomic_data(
+  start_date = "2024-01-01",
+  end_date = "2024-01-31",
+  latitude = 45.4215,
+  longitude = -75.6972
+)
+
+head(data)
+```
+
+### Visualizing Trends
+
+Once you have the data, you can easily plot relationships using `ggplot2`.
+
+```{r plot, eval = FALSE}
+library(ggplot2)
+
+ggplot(data, aes(x = DATE)) +
+  geom_line(aes(y = avg_temp, color = "Temperature")) +
+  geom_line(aes(y = political_unrest_score, color = "Political Unrest")) +
+  labs(title = "Temperature vs Political Unrest", y = "Value")
+```

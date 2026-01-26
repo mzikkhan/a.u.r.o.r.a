@@ -1,0 +1,24 @@
+Package: aurora
+Type: Package
+Title: Multimodal Data Integration for Weather, Economics, and GDELT
+Version: 0.1.0
+Author: Zaed Khan
+Maintainer: Zaed Khan <zaed@example.com>
+Description: Tools to fetch, aggregate, and merge daily weather data from Open-Meteo, 
+    economic indicators from FRED, and event data from GDELT into a unified 
+    macroeconomic dataframe.
+License: MIT + file LICENSE
+Encoding: UTF-8
+LazyData: true
+Imports: 
+    tidyverse,
+    fredr,
+    zoo,
+    utils,
+    stats
+RoxygenNote: 7.3.2
+Suggests: 
+    testthat (>= 3.0.0),
+    knitr,
+    rmarkdown
+VignetteBuilder: knitr
