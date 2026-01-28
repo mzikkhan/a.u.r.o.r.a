@@ -191,6 +191,20 @@ e) Prioritized testing and error handling to improve production readiness.
 f) Used roxygen2 for documentation to enable automatic help-file generation.
 
 
+Commit links:
+
+https://github.com/mzikkhan/a.u.r.o.r.a/commit/0dc4a70a9f0346a98a2f7747691aa8fd7dcb03b4
+
+https://github.com/mzikkhan/a.u.r.o.r.a/commit/f79134d36ebcd72da860036e023d9873c9421182
+
+https://github.com/mzikkhan/a.u.r.o.r.a/commit/95f63000dee06889c2eba38752980674d10e29c1
+
+https://github.com/mzikkhan/a.u.r.o.r.a/commit/e52f2eda1ca692d43891a44c285f789f76f48237
+
+
+
+
+
 
 
 
