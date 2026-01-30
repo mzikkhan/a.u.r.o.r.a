@@ -10,13 +10,15 @@ vignette: >
 ```{r, include = FALSE}
 knitr::opts_chunk$set(
   collapse = TRUE,
-  comment = "#>"
+  comment = "#>",
+  message = FALSE,
+  warning = FALSE
 )
 ```
 
 ## Introduction
 
-The `aurora` package allows you to easily fetch and align disparate data sources—weather, economics, and events—into a single daily timeline.
+The `aurora` package provides a unified interface for fetching and aligning weather, economic, and global event data into a single daily timeline suitable for macroeconomic analysis.
 
 ## Usage
 
@@ -24,9 +26,10 @@ The `aurora` package allows you to easily fetch and align disparate data sources
 library(aurora)
 ```
 
-### Fetching Data
+## Fetching Data
 
-You can fetch a comprehensive dataset for a specific location and date range. Here we look at Ottawa, Canada for January 2024.
+You can fetch a comprehensive dataset for a specific location and date range. Here we look at Ottawa, Canada for January 2024. \> **Note:** API calls are disabled during vignette build (`eval = FALSE`).\
+\> Run the code locally to fetch live data.
 
 ```{r fetch, eval = FALSE}
 # Fetches data from Open-Meteo, FRED, and GDELT
@@ -40,7 +43,16 @@ data <- get_macroeconomic_data(
 head(data)
 ```
 
-### Visualizing Trends
+## Output
+
+The returned dataset includes:
+
+-   DATE
+-   Weather: avg_temp, max_temp, tot_rain
+-   Events: political_unrest_score, natural_disaster_score
+-   Economics: interest_rate, mortgage_rate, unemployment, cpi_inflation, gdp, public_debt
+
+## Visualizing Trends
 
 Once you have the data, you can easily plot relationships using `ggplot2`.
 
@@ -52,3 +64,9 @@ ggplot(data, aes(x = DATE)) +
   geom_line(aes(y = political_unrest_score, color = "Political Unrest")) +
   labs(title = "Temperature vs Political Unrest", y = "Value")
 ```
+
+## Summary
+
+The `aurora` package provides a unified and resilient pipeline for constructing daily macroeconomic datasets by integrating weather, economic, and global event data.
+
+This enables researchers and analysts to focus on modeling and analysis rather than data collection and preprocessing.
