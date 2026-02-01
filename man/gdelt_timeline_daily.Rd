@@ -2,22 +2,22 @@
 % Please edit documentation in R/aurora.R
 \name{gdelt_timeline_daily}
 \alias{gdelt_timeline_daily}
-\title{Get GDELT Timeline Data}
+\title{Get a daily GDELT TimelineTone score and align to a date spine}
 \usage{
 gdelt_timeline_daily(query_text, out_col, start, end)
 }
 \arguments{
-\item{query_text}{Character string. Query text for GDELT.}
+\item{query_text}{Character. GDELT query string.}
 
-\item{out_col}{Character string. Name of the output column for the score.}
+\item{out_col}{Character. Name of the score column to create.}
 
-\item{start}{Character string. Start date.}
+\item{start}{Character. Start date in "YYYY-MM-DD".}
 
-\item{end}{Character string. End date.}
+\item{end}{Character. End date in "YYYY-MM-DD".}
 }
 \value{
-A data frame with Date and the requested score column.
+A data.frame with columns: date and the score column.
 }
 \description{
-Fetches sentiment tone timeline from GDELT API.
+Get a daily GDELT TimelineTone score and align to a date spine
 }

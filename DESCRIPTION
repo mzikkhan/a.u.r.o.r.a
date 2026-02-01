@@ -10,15 +10,20 @@ Description: Tools to fetch, aggregate, and merge daily weather data from Open-M
 License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true
-Imports: 
-    tidyverse,
+Imports:
+    dplyr,
+    tidyr,
+    purrr,
+    ggplot2,
+    patchwork,
     fredr,
     zoo,
     utils,
     stats
 RoxygenNote: 7.3.2
-Suggests: 
+Suggests:
     testthat (>= 3.0.0),
     knitr,
     rmarkdown
 VignetteBuilder: knitr
+Config/testthat/edition: 3

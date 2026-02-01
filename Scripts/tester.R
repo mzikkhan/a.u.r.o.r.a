@@ -1,5 +1,5 @@
 setwd("C:/Users/ckart/Desktop/MDS/DATA\ 534/a.u.r.o.r.a")
-source("aurora.R")
+source(file.path("R", "aurora.R"))
 
 # 2. Call the function with your specific inputs
 my_analysis_data <- get_macroeconomic_data(

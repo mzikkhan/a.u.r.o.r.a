@@ -2,22 +2,22 @@
 % Please edit documentation in R/aurora.R
 \name{get_daily_weather}
 \alias{get_daily_weather}
-\title{Get Daily Weather Data}
+\title{Get daily weather summary from Open-Meteo archive API}
 \usage{
 get_daily_weather(start, end, lat, lon)
 }
 \arguments{
-\item{start}{Character string. Start date in 'YYYY-MM-DD' format.}
+\item{start}{Character. Start date in "YYYY-MM-DD".}
 
-\item{end}{Character string. End date in 'YYYY-MM-DD' format.}
+\item{end}{Character. End date in "YYYY-MM-DD".}
 
 \item{lat}{Numeric. Latitude.}
 
 \item{lon}{Numeric. Longitude.}
 }
 \value{
-A data frame with Date, avg_temp, max_temp, and tot_rain.
+A data.frame with columns: date, avg_temp, max_temp, tot_rain.
 }
 \description{
-Fetches hourly weather data from Open-Meteo and aggregates it to daily summaries.
+Get daily weather summary from Open-Meteo archive API
 }

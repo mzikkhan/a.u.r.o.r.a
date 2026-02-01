@@ -2,22 +2,36 @@
 % Please edit documentation in R/aurora.R
 \name{get_macroeconomic_data}
 \alias{get_macroeconomic_data}
-\title{Get Macroeconomic Data}
+\title{Merge weather, economic, and GDELT features into one macro dataset}
 \usage{
-get_macroeconomic_data(start_date, end_date, latitude, longitude)
+get_macroeconomic_data(
+  start_date,
+  end_date,
+  latitude,
+  longitude,
+  weather_fun = get_daily_weather,
+  econ_fun = get_daily_economic_data,
+  gdelt_fun = gdelt_timeline_daily
+)
 }
 \arguments{
-\item{start_date}{Character string. Start date.}
+\item{start_date}{Character. Start date in "YYYY-MM-DD".}
 
-\item{end_date}{Character string. End date.}
+\item{end_date}{Character. End date in "YYYY-MM-DD".}
 
 \item{latitude}{Numeric. Latitude.}
 
 \item{longitude}{Numeric. Longitude.}
+
+\item{weather_fun}{Function. Weather fetcher (default: get_daily_weather).}
+
+\item{econ_fun}{Function. Economic fetcher (default: get_daily_economic_data).}
+
+\item{gdelt_fun}{Function. GDELT fetcher (default: gdelt_timeline_daily).}
 }
 \value{
-A merged data frame containing all indicators.
+A data.frame with DATE and merged feature columns.
 }
 \description{
-Orchestrates the fetching and merging of weather, economic, and political/disaster data.
+Merge weather, economic, and GDELT features into one macro dataset
 }
