@@ -1,38 +1,34 @@
 # Aurora Package
 
-![CI Badge](https://github.com/zaedkhan/aurora/actions/workflows/R-CMD-check.yaml/badge.svg)
+## ## Motivation
 
-**Aurora** is an R package designed to integrate daily weather, economic, and event (GDELT) data into a single, cohesive dataset for macroeconomic analysis.
+Macroeconomic analysis often requires integrating multiple external data sources such as weather data, economic indicators, and global event sentiment data. These datasets are typically accessed through different APIs and data formats, making the data collection and preprocessing workflow time-consuming and error-prone.
 
-## Features
-- **Weather Data**: Fetches daily temperature and precipitation summaries from Open-Meteo.
-- **Economic Indicators**: Retrieves key economic metrics (GDP, Inflation, Unemployment, etc.) from the FRED API.
-- **Event Data**: Queries GDELT for sentiment scores related to political unrest and natural disasters.
-- **Robust Error Handling**: Gracefully handles API failures by returning missing data (NAs) instead of crashing.
+**Aurora** addresses this challenge by providing a unified interface that automatically fetches, processes, and integrates these datasets into a single, analysis-ready macroeconomic dataset. This allows data analysts to focus more on insight generation rather than data collection and preprocessing.
 
-## Installation
-You can install the development version from GitHub:
+## Data Sources
 
-```R
-# install.packages("devtools")
-devtools::install_github("zaedkhan/aurora")
-```
+Aurora integrates data from the following external sources:
 
-## Usage
+- **Open-Meteo API** – Provides daily weather summaries including temperature and precipitation.
+- **FRED API** – Provides key economic indicators such as GDP, CPI, inflation rate, and unemployment rate.
+- **GDELT Project** – Provides global event data and sentiment indicators related to political unrest, disasters, and global news activity.
 
-```R
-library(aurora)
+## Main Functions
 
-# Fetch data for a specific location and date range
-data <- get_macroeconomic_data(
-  start_date = "2024-01-01", 
-  end_date = "2024-01-31", 
-  latitude = 45.4215, 
-  longitude = -75.6972
-)
+| Function | Description |
+|---|---|
+| `get_macroeconomic_data()` | Fetches integrated macroeconomic dataset combining weather, economic, and event data |
+| `get_weather_data()` | Retrieves weather data for specified location and date range |
+| `get_fred_data()` | Retrieves economic indicators from FRED |
+| `get_gdelt_data()` | Retrieves event sentiment data from GDELT |
 
-head(data)
-```
+
+## Error Handling
+
+Aurora is designed with robust error handling to ensure reliability during API communication. If an external data source is temporarily unavailable or returns an error, Aurora gracefully handles the failure by returning missing values (NA) instead of interrupting execution. This ensures downstream workflows remain stable.
 
 ## License
-MIT License. See [LICENSE](LICENSE) for details.
+
+This project is licensed under the MIT License.  
+See the [LICENSE](LICENSE) file for full details.
