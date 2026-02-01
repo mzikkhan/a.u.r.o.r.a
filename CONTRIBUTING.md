@@ -1,6 +1,5 @@
 # Contributing to Aurora
 
-Thank you for your interest in contributing to Aurora!  
 This document outlines both our external contribution process and our internal team workflow.
 
 Aurora is developed collaboratively by a three–member team. We follow structured Git practices to ensure code quality, transparency, and equal contribution.
