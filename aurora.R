@@ -6,69 +6,68 @@ library(zoo)
 
 ## ------------------------------------------  WEATHER API  ---------------------------------------------------
 
-# get_daily_weather: fetches hourly Open-Meteo CSV and returns daily summary
 get_daily_weather <- function(start, end, lat, lon) {
   
-  # Validate inputs to ensure all required geographic and temporal parameters are present
   if (is.null(lat) || missing(lon) || is.null(start) || is.null(end)) {
-    stop("Please provide start, end, lat and lon. Example: get_daily_weather('2026-01-01','2026-01-15', lat=51.5074, lon=-0.1278)")
+    stop("Provide start, end, lat, lon. Example: get_daily_weather('2026-01-01','2026-01-15', 51.5074, -0.1278)")
   }
   
-  # Create a spine sequence of dates to ensure we can return a valid structure even on failure
   spine <- data.frame(date = seq(as.Date(start), as.Date(end), by = "day"))
   
   result <- tryCatch({
-    # 1. CALL API
-    # Construct the API request URL for Open-Meteo.
-    url <- paste0("https://api.open-meteo.com/v1/forecast?",
-                  "latitude=", lat, "&longitude=", lon,
-                  "&start_date=", start, "&end_date=", end,
-                  "&hourly=temperature_2m,precipitation",
-                  "&timezone=auto",                        
-                  "&format=csv")
     
-    # 2. Read and Clean Data
-    # The Open-Meteo CSV format includes metadata headers in the first ~10 lines. 
-    weather_data <- read.csv(url, skip = 10, header = FALSE)
-    
-    # Manually assign column names since we skipped the header row.
-    colnames(weather_data) <- c("datetime", "temp_c", "precip_mm")
-    
-    # Convert ISO8601 string to POSIXct for time manipulation
-    weather_data$datetime <- as.POSIXct(weather_data$datetime, format="%Y-%m-%dT%H:%M")
-    weather_data$date <- as.Date(weather_data$datetime)
-    
-    # 4. Calculate stats
-    daily_summary <- aggregate(cbind(temp_c, precip_mm) ~ date, 
-                               data = weather_data, 
-                               FUN = function(x) c(mean = mean(x), max = max(x), sum = sum(x)))
-    
-    # 5. Clean up the messy matrix output from aggregate
-    daily_summary <- data.frame(
-      date      = daily_summary$date,
-      avg_temp  = round(daily_summary$temp_c[, "mean"], 1),
-      max_temp  = daily_summary$temp_c[, "max"],
-      tot_rain  = daily_summary$precip_mm[, "sum"]
+    # ✅ Use ARCHIVE endpoint for historical ranges
+    url <- paste0(
+      "https://archive-api.open-meteo.com/v1/archive?",
+      "latitude=", lat, "&longitude=", lon,
+      "&start_date=", start, "&end_date=", end,
+      "&hourly=temperature_2m,precipitation",
+      "&timezone=auto",
+      "&format=csv"
     )
     
-    # Ensure all dates in range are present (though API usually returns full range)
+    # Read CSV (no need to guess skip=10; safer: find header row)
+    raw <- readLines(url)
+    
+    # Find the line where the actual CSV header starts (contains "time")
+    header_i <- grep("^time,", raw)[1]
+    if (is.na(header_i)) stop("Could not find CSV header in Open-Meteo response.")
+    
+    csv_text <- raw[header_i:length(raw)]
+    weather_data <- read.csv(text = paste(csv_text, collapse = "\n"))
+    
+    # Rename columns to match your code expectations
+    # Open-Meteo usually returns columns: time, temperature_2m, precipitation
+    names(weather_data) <- c("datetime", "temp_c", "precip_mm")
+    
+    weather_data$datetime <- as.POSIXct(weather_data$datetime, format = "%Y-%m-%dT%H:%M")
+    weather_data$date <- as.Date(weather_data$datetime)
+    
+    daily_summary <- weather_data %>%
+      group_by(date) %>%
+      summarise(
+        avg_temp = round(mean(temp_c, na.rm = TRUE), 1),
+        max_temp = max(temp_c, na.rm = TRUE),
+        tot_rain = sum(precip_mm, na.rm = TRUE),
+        .groups = "drop"
+      )
+    
     out <- spine %>% left_join(daily_summary, by = "date")
-    return(out)
+    out
     
   }, error = function(e) {
     message("Error in get_daily_weather: ", e$message)
-    # Return spine with NAs for data columns
     spine$avg_temp <- NA
     spine$max_temp <- NA
     spine$tot_rain <- NA
-    return(spine)
+    spine
   })
-
-  return(result)
+  
+  result
 }
 
-# daily_weather_data <- get_daily_weather('2026-01-01','2026-01-15', lat=51.5074, lon=-0.1278)
-# daily_weather_data
+#daily_weather_data <- get_daily_weather("2025-01-01", "2026-01-15", 51.5074, -0.1278)
+#daily_weather_data
 
 ## ----------------------------------------  ECONOMIC API  --------------------------------------------------
 
@@ -206,6 +205,25 @@ gdelt_timeline_daily <- function(query_text, out_col, start, end) {
   return(result)
 }
 
+#start_date <- '2026-01-01'
+#end_date <- '2026-01-15'
+
+#political_unrest_daily <- gdelt_timeline_daily(
+#  query_text = '(protest OR unrest) sourcecountry:CA',
+#  out_col = "political_unrest_score",
+#  start = start_date,
+#  end = end_date
+#)
+
+#natural_disaster_daily <- gdelt_timeline_daily(
+#  query_text = '(theme:NATURAL_DISASTER OR disaster OR storm OR flood) sourcecountry:CA',
+#  out_col = "natural_disaster_score",
+#  start = start_date,
+#  end = end_date
+#)
+#head(political_unrest_daily)
+#head(natural_disaster_daily)
+
 # ---------------------------------------------- MERGE -------------------------------------------------------
 
 get_macroeconomic_data <- function(start_date, end_date, latitude, longitude) {
@@ -218,15 +236,14 @@ get_macroeconomic_data <- function(start_date, end_date, latitude, longitude) {
   
   # get daily political unrest data
   political_unrest_daily <- gdelt_timeline_daily(
-    query_text = '(protest OR unrest) sourcecountry:Canada',
+    query_text = '(protest OR unrest) sourcecountry:CA',
     out_col = "political_unrest_score",
     start = start_date,
     end = end_date
   )
   
-  # get daily natural disaster data
   natural_disaster_daily <- gdelt_timeline_daily(
-    query_text = '(theme:NATURAL_DISASTER OR "disaster" OR "storm" OR "flood") sourcecountry:CA',
+    query_text = '(theme:NATURAL_DISASTER OR disaster OR storm OR flood) sourcecountry:CA',
     out_col = "natural_disaster_score",
     start = start_date,
     end = end_date
@@ -257,3 +274,123 @@ get_macroeconomic_data <- function(start_date, end_date, latitude, longitude) {
 
 # sample = get_macroeconomic_data('2026-01-01','2026-01-15', lat=51.5074, lon=-0.1278)
 # sample
+
+################################################################################################################
+
+################################################################################################################
+
+revenue_merge <- function(input_df, csv_path){
+  csv_df <- read.csv(csv_path, stringsAsFactors = FALSE)
+  
+  # ---- Check Date column exists ----
+  if (!"DATE" %in% names(input_df)) {
+    stop("Input dataframe must contain 'Date' column")
+  }
+  
+  if (!"Date" %in% names(csv_df)) {
+    stop("CSV file must contain 'Date' column")
+  }
+  
+  # ---- Convert Date columns to Date type ----
+  input_df$Date <- as.Date(input_df$DATE)
+  csv_df$Date <- as.Date(csv_df$Date)
+  
+  # ---- Perform INNER JOIN ----
+  merged_df <- dplyr::inner_join(input_df, csv_df, by = "Date")
+  
+  return(merged_df)
+}
+
+################################################################################################################
+
+################################################################################################################
+
+plotter <- function(df,
+                                         cols,
+                                         date_col = "Date",
+                                         revenue_col = "Revenue",
+                                         ncol = NULL,
+                                         save_path = NULL,
+                                         width = 14, height = 9, dpi = 300,
+                                         scale_method = c("zscore", "minmax"),
+                                         drop_na = TRUE) {
+  
+  scale_method <- match.arg(scale_method)
+  
+  if (!requireNamespace("ggplot2", quietly = TRUE)) stop("Install ggplot2: install.packages('ggplot2')")
+  if (!requireNamespace("patchwork", quietly = TRUE)) stop("Install patchwork: install.packages('patchwork')")
+  
+  # Checks
+  if (!date_col %in% names(df)) stop(paste0("Missing date column: ", date_col))
+  if (!revenue_col %in% names(df)) stop(paste0("Missing revenue column: ", revenue_col))
+  
+  missing_cols <- setdiff(cols, names(df))
+  if (length(missing_cols) > 0) stop(paste("These columns are missing:", paste(missing_cols, collapse = ", ")))
+  
+  # Date conversion + sort
+  df[[date_col]] <- as.Date(df[[date_col]])
+  df <- df[order(df[[date_col]]), , drop = FALSE]
+  
+  # scaler
+  scale_vec <- function(x) {
+    x <- as.numeric(x)
+    if (scale_method == "zscore") {
+      s <- stats::sd(x, na.rm = TRUE)
+      if (is.na(s) || s == 0) return(rep(NA_real_, length(x)))
+      (x - mean(x, na.rm = TRUE)) / s
+    } else {
+      rng <- range(x, na.rm = TRUE)
+      if (any(!is.finite(rng)) || rng[1] == rng[2]) return(rep(NA_real_, length(x)))
+      (x - rng[1]) / (rng[2] - rng[1])
+    }
+  }
+  
+  # Auto ncol
+  if (is.null(ncol)) {
+    k <- length(cols)
+    ncol <- if (k <= 2) 1 else if (k <= 4) 2 else if (k <= 9) 3 else 4
+  }
+  
+  plots <- lapply(cols, function(xcol) {
+    tmp <- df[, c(date_col, revenue_col, xcol), drop = FALSE]
+    names(tmp) <- c("Date", "Revenue", "X")
+    
+    # Keep finite numeric (and optionally drop NA)
+    tmp$Revenue <- as.numeric(tmp$Revenue)
+    tmp$X <- as.numeric(tmp$X)
+    
+    if (drop_na) {
+      tmp <- tmp[is.finite(tmp$Revenue) & is.finite(tmp$X) & !is.na(tmp$Date), , drop = FALSE]
+    } else {
+      tmp <- tmp[!is.na(tmp$Date), , drop = FALSE]
+    }
+    
+    # Scaled series for overlay comparison
+    tmp$Revenue_scaled <- scale_vec(tmp$Revenue)
+    tmp$X_scaled <- scale_vec(tmp$X)
+    
+    # Build long format WITHOUT extra packages
+    long_df <- rbind(
+      data.frame(Date = tmp$Date, Series = "Revenue", Value = tmp$Revenue_scaled),
+      data.frame(Date = tmp$Date, Series = xcol,      Value = tmp$X_scaled)
+    )
+    
+    ggplot2::ggplot(long_df, ggplot2::aes(x = Date, y = Value, group = Series, linetype = Series)) +
+      ggplot2::geom_line() +
+      ggplot2::labs(
+        title = paste0("Revenue vs ", xcol),
+        x = date_col,
+        y = if (scale_method == "zscore") "z-score (mean=0, sd=1)" else "min-max scaled (0–1)"
+      ) +
+      ggplot2::theme_minimal()
+  })
+  
+  combined <- patchwork::wrap_plots(plots, ncol = ncol)
+  
+  if (!is.null(save_path)) {
+    ggplot2::ggsave(save_path, combined, width = width, height = height, dpi = dpi)
+  }
+  
+  print(combined)
+  invisible(combined)
+}
