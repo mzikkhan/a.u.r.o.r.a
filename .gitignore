@@ -1,0 +1,7 @@
+# Jupyter notebook checkpoints
+.ipynb_checkpoints/
+
+# RStudio / R junk (optional but recommended)
+.Rproj.user/
+.Rhistory
+.RData

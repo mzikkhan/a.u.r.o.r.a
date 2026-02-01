@@ -2,22 +2,23 @@
 % Please edit documentation in R/aurora.R
 \name{get_daily_economic_data}
 \alias{get_daily_economic_data}
-\title{Get Daily Economic Data}
+\title{Get daily economic indicators from FRED aligned to a daily date spine}
 \usage{
 get_daily_economic_data(start, end, lat, lon)
 }
 \arguments{
-\item{start}{Character string. Start date in 'YYYY-MM-DD' format.}
+\item{start}{Character. Start date in "YYYY-MM-DD".}
 
-\item{end}{Character string. End date in 'YYYY-MM-DD' format.}
+\item{end}{Character. End date in "YYYY-MM-DD".}
 
-\item{lat}{Numeric. Latitude (not used, kept for API consistency).}
+\item{lat}{Numeric. Latitude (kept for interface consistency; not used by FRED).}
 
-\item{lon}{Numeric. Longitude (not used, kept for API consistency).}
+\item{lon}{Numeric. Longitude (kept for interface consistency; not used by FRED).}
 }
 \value{
-A data frame with daily economic indicators.
+A data.frame with columns: date and economic indicators
+  (interest_rate, mortgage_rate, unemployment, cpi_inflation, gdp, public_debt).
 }
 \description{
-Fetches economic indicators from FRED and aggregates/fills them to daily frequency.
+Get daily economic indicators from FRED aligned to a daily date spine
 }
