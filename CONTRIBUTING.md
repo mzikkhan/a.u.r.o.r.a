@@ -1,21 +1,111 @@
 # Contributing to Aurora
 
-Thank you for your interest in contributing to Aurora!
+Thank you for your interest in contributing to Aurora!  
+This document outlines both our external contribution process and our internal team workflow.
 
-## How to Contribute
+Aurora is developed collaboratively by a three–member team. We follow structured Git practices to ensure code quality, transparency, and equal contribution.
 
-1. **Fork the repository** on GitHub.
-2. **Clone the fork** to your local machine.
-3. **Create a branch** for your feature or fix.
-4. **Make your changes**. Ensure you write tests for new functionality.
-5. **Run tests** using `devtools::test()`.
-6. **Push to your branch**.
-7. **Submit a Pull Request**.
+---
 
-## Reporting Issues
+## Team Contributions
 
-If you find a bug or have a feature request, please use the GitHub Issues tab to report it. Provide as much detail as possible.
+Development responsibilities were distributed across the team as follows:
 
-## Code Style
+### Mohammad Zaed Iqbal Khan
 
-Please attempt to follow standard R coding style. Documentation uses Roxygen2.
+- Initial development of core API wrapper  
+- Orchestration of Aurora functions  
+- Unit and integration test implementation  
+- Error handling across primary functions  
+- Git repository structure and file organization  
+
+---
+
+### Ilakiya Yuvarani Paulraj
+
+- Merging of three API wrappers  
+- Integration of wrappers into a unified main function  
+- Inline code commenting  
+- Documentation using Roxygen2  
+- Vignette preparation  
+- CRAN package setup and submission preparation  
+
+---
+
+### Karthik Chandran
+
+- Development of revenue integration function  
+- Development of correlation plotting function  
+- Error handling for analytical functions  
+- GitHub Actions CI/CD pipeline  
+- README updates and maintenance  
+
+---
+
+## Team Workflow Practices
+
+To ensure consistent collaboration and equal contribution, the team followed these workflow standards:
+
+### Branching Strategy
+
+- Each feature or fix was developed on its own branch.
+- Branch naming followed:
+  - `main` for main branch.
+  - `Zaed` for development branch.
+  - `Ilakiya` for development branch.
+  - `Karthik` for development branch.
+
+
+---
+
+### Pull Requests
+
+All changes were merged via Pull Requests:
+
+- Every PR required at least one reviewer.
+- CI checks (GitHub Actions) had to pass before merging.
+
+Direct commits to `main` were avoided.
+
+---
+
+### Code Reviews
+
+- Each team member reviewed others’ PRs.
+- Feedback was addressed before merge.
+- This ensured shared ownership of the codebase and knowledge transfer.
+
+---
+
+### Testing
+
+- Unit and integration tests were added for new functionality.
+
+### Documentation
+
+- Functions are documented using Roxygen2.
+- A vignette provides package usage examples.
+- README is kept up to date with installation and usage instructions.
+
+---
+
+### Git History and Equal Contribution
+
+The Git commit history demonstrates:
+
+- All team members contributed code regularly.
+- Feature branches and Pull Requests were consistently used.
+- CI/CD enforcement through GitHub Actions.
+- Balanced contribution across core development, testing, documentation, and deployment.
+
+This history reflects adherence to the workflow described above and confirms equal participation by all group members.
+
+---
+
+### Reporting Issues
+
+Please use GitHub Issues to report bugs or request features. Include:
+
+- Clear description
+- Steps to reproduce
+- Expected vs actual behavior
