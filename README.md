@@ -1,6 +1,6 @@
 # Aurora Package
 
-## ## Motivation
+## Motivation
 
 Macroeconomic analysis often requires integrating multiple external data sources such as weather data, economic indicators, and global event sentiment data. These datasets are typically accessed through different APIs and data formats, making the data collection and preprocessing workflow time-consuming and error-prone.
 
