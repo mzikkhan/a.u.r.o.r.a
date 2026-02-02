@@ -1,6 +1,6 @@
 
 # 1. File path
-source(file.path("R", "aurora.R"))
+source(file.path("R", "aurora.R")
 
 # 2. Call the function with your specific inputs
 my_analysis_data <- get_macroeconomic_data(
