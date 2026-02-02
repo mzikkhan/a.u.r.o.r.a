@@ -25,6 +25,46 @@ Aurora integrates data from the following external sources:
 | `revenue_merge()` | Merges macro dataset with revenue CSV by Date |
 | `plotter()` | Plots revenue vs selected variables with scaling |
 
+## Usage
+
+Here is an example of how to use the Aurora package to fetch data, merge it with revenue, and visualize the results.
+
+```r
+# 1. Source the package functions
+source(file.path("R", "aurora.R"))
+
+# 2. Fetch Macroeconomic Data
+# Provide start/end dates and location coordinates (e.g., Copenhagen)
+my_analysis_data <- get_macroeconomic_data(
+  start_date = "2025-01-01",
+  end_date   = "2025-12-01",
+  latitude   = 55.6761, 
+  longitude  = 12.5683
+)
+
+# 3. View the fetched data
+head(my_analysis_data)
+
+# 4. Integrate Revenue Data
+# Merge with your internal revenue data (must have a 'Date' column)
+rev_data <- revenue_merge(my_analysis_data, "Scripts/revenue_data_2025.csv")
+head(rev_data)
+
+# 5. Visualize Correlations
+# Select columns to analyze against Revenue
+plots <- c("avg_temp", "max_temp", "tot_rain", 
+           "natural_disaster_score", "political_unrest_score",
+           "interest_rate", "mortgage_rate", "unemployment", 
+           "cpi_inflation", "gdp", "public_debt")
+
+# Generate scaled plots (z-score)
+plotter(rev_data,
+        cols = plots,
+        date_col = "Date",
+        revenue_col = "Revenue",
+        ncol = 3,
+        scale_method = "zscore")
+```
 
 ## Error Handling
 
