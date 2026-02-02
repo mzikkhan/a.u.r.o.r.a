@@ -19,9 +19,11 @@ Aurora integrates data from the following external sources:
 | Function | Description |
 |---|---|
 | `get_macroeconomic_data()` | Fetches integrated macroeconomic dataset combining weather, economic, and event data |
-| `get_weather_data()` | Retrieves weather data for specified location and date range |
-| `get_fred_data()` | Retrieves economic indicators from FRED |
-| `get_gdelt_data()` | Retrieves event sentiment data from GDELT |
+| `get_daily_weather()` | Retrieves weather data for specified location and date range |
+| `get_daily_economic_data()` | Retrieves economic indicators from FRED |
+| `gdelt_timeline_daily()` | Retrieves event sentiment data from GDELT |
+| `revenue_merge()` | Merges macro dataset with revenue CSV by Date |
+| `plotter()` | Plots revenue vs selected variables with scaling |
 
 
 ## Error Handling
