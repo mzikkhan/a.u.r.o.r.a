@@ -93,7 +93,6 @@ get_daily_economic_data <- function(start, end, lat, lon) {
     # Set it as an environment variable: Sys.setenv(FRED_API_KEY="...")
     fred_api_key <- Sys.getenv("FRED_API_KEY")
     if (fred_api_key == "") stop("Missing FRED_API_KEY environment variable.")
-    
     fredr::fredr_set_key(fred_api_key)
     
     indicators <- c(
