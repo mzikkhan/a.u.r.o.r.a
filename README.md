@@ -1,5 +1,7 @@
 # A.U.R.O.R.A
 
+[![R-CMD-check](https://github.com/mzikkhan/a.u.r.o.r.a/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/mzikkhan/a.u.r.o.r.a/actions/workflows/R-CMD-check.yaml)
+
 ## Motivation
 
 Macroeconomic analysis often requires integrating multiple external data sources such as weather data, economic indicators, and global event sentiment data. These datasets are typically accessed through different APIs and data formats, making the data collection and preprocessing workflow time-consuming and error-prone.
@@ -13,6 +15,21 @@ You can install the package directly with:
 ```r
 install.packages('aurora')
 ```
+
+## Configuration
+
+To use the economic data functions, you need a FRED API key.
+
+1.  **Get a Key**: Request one for free at [fred.stlouisfed.org](https://fred.stlouisfed.org/docs/api/api_key.html).
+2.  **Local Usage**: Set it in your `.Renviron` file or export it in your shell:
+    ```bash
+    FRED_API_KEY=abcdef123456...
+    ```
+    Or in R before running:
+    ```r
+    Sys.setenv(FRED_API_KEY = "your_key_here")
+    ```
+3.  **CI/CD (GitHub Actions)**: Add `FRED_API_KEY` to your repository secrets (**Settings > Secrets and variables > Actions > New repository secret**).
 
 ## Data Sources
 
@@ -38,8 +55,8 @@ Aurora integrates data from the following external sources:
 Here is an example of how to use the Aurora package to fetch data, merge it with revenue, and visualize the results.
 
 ```r
-# 1. Source the package functions
-source(file.path("R", "aurora.R"))
+# 1. Load the package
+library(aurora)
 
 # 2. Fetch Macroeconomic Data
 # Provide start/end dates and location coordinates (e.g., Canada)

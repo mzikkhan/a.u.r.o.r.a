@@ -5,6 +5,7 @@ on:
     branches: [main, Testing]
   pull_request:
     branches: [main]
+  workflow_dispatch: {}
 
 jobs:
   R-CMD-check:
