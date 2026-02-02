@@ -89,7 +89,6 @@ get_daily_economic_data <- function(start, end, lat, lon) {
   
   result <- tryCatch({
     
-    # IMPORTANT: do NOT hardcode API keys in package code.
     # Set it as an environment variable: Sys.setenv(FRED_API_KEY="...")
     fred_api_key <- Sys.getenv("FRED_API_KEY")
     if (fred_api_key == "") stop("Missing FRED_API_KEY environment variable.")
@@ -264,15 +263,32 @@ get_macroeconomic_data <- function(start_date, end_date, latitude, longitude,
 
 revenue_merge <- function(input_df, csv_path) {
   
-  csv_df <- utils::read.csv(csv_path, stringsAsFactors = FALSE)
+  # Input validation
+  if (!is.data.frame(input_df)) stop("input_df must be a data frame.")
+  if (!file.exists(csv_path)) stop("CSV path does not exist: ", csv_path)
   
-  if (!"DATE" %in% names(input_df)) stop("Input dataframe must contain 'DATE' column")
-  if (!"Date" %in% names(csv_df)) stop("CSV file must contain 'Date' column")
+  result <- tryCatch({
+    
+    # Read the revenue CSV
+    csv_df <- utils::read.csv(csv_path, stringsAsFactors = FALSE)
+    
+    # Check for required columns
+    if (!"DATE" %in% names(input_df)) stop("Input dataframe must contain 'DATE' column")
+    if (!"Date" %in% names(csv_df)) stop("CSV file must contain 'Date' column")
+    
+    # Standardize Date columns
+    input_df$Date <- as.Date(input_df$DATE)
+    csv_df$Date   <- as.Date(csv_df$Date)
+    
+    # Merge datasets (inner join to keep only matching dates)
+    dplyr::inner_join(input_df, csv_df, by = "Date")
+    
+  }, error = function(e) {
+    message("Error in revenue_merge: ", e$message)
+    return(NULL)
+  })
   
-  input_df$Date <- as.Date(input_df$DATE)
-  csv_df$Date <- as.Date(csv_df$Date)
-  
-  dplyr::inner_join(input_df, csv_df, by = "Date")
+  result
 }
 
 
@@ -305,78 +321,100 @@ plotter <- function(df,
                     scale_method = c("zscore", "minmax"),
                     drop_na = TRUE) {
   
+  # Validate scale method argument
   scale_method <- match.arg(scale_method)
   
+  # Check for required packages
   if (!requireNamespace("ggplot2", quietly = TRUE)) stop("Install ggplot2: install.packages('ggplot2')")
   if (!requireNamespace("patchwork", quietly = TRUE)) stop("Install patchwork: install.packages('patchwork')")
   
-  if (!date_col %in% names(df)) stop(paste0("Missing date column: ", date_col))
-  if (!revenue_col %in% names(df)) stop(paste0("Missing revenue column: ", revenue_col))
-  
-  missing_cols <- setdiff(cols, names(df))
-  if (length(missing_cols) > 0) stop(paste("These columns are missing:", paste(missing_cols, collapse = ", ")))
-  
-  df[[date_col]] <- as.Date(df[[date_col]])
-  df <- df[order(df[[date_col]]), , drop = FALSE]
-  
-  scale_vec <- function(x) {
-    x <- as.numeric(x)
-    if (scale_method == "zscore") {
-      s <- stats::sd(x, na.rm = TRUE)
-      if (is.na(s) || s == 0) return(rep(NA_real_, length(x)))
-      (x - mean(x, na.rm = TRUE)) / s
-    } else {
-      rng <- range(x, na.rm = TRUE)
-      if (any(!is.finite(rng)) || rng[1] == rng[2]) return(rep(NA_real_, length(x)))
-      (x - rng[1]) / (rng[2] - rng[1])
-    }
-  }
-  
-  if (is.null(ncol)) {
-    k <- length(cols)
-    ncol <- if (k <= 2) 1 else if (k <= 4) 2 else if (k <= 9) 3 else 4
-  }
-  
-  plots <- lapply(cols, function(xcol) {
-    tmp <- df[, c(date_col, revenue_col, xcol), drop = FALSE]
-    names(tmp) <- c("Date", "Revenue", "X")
+  tryCatch({
     
-    tmp$Revenue <- as.numeric(tmp$Revenue)
-    tmp$X <- as.numeric(tmp$X)
+    # Check for required columns in dataframe
+    if (!date_col %in% names(df)) stop(paste0("Missing date column: ", date_col))
+    if (!revenue_col %in% names(df)) stop(paste0("Missing revenue column: ", revenue_col))
     
-    if (drop_na) {
-      tmp <- tmp[is.finite(tmp$Revenue) & is.finite(tmp$X) & !is.na(tmp$Date), , drop = FALSE]
-    } else {
-      tmp <- tmp[!is.na(tmp$Date), , drop = FALSE]
+    missing_cols <- setdiff(cols, names(df))
+    if (length(missing_cols) > 0) stop(paste("These columns are missing:", paste(missing_cols, collapse = ", ")))
+    
+    # Prepare data: convert date and sort
+    df[[date_col]] <- as.Date(df[[date_col]])
+    df <- df[order(df[[date_col]]), , drop = FALSE]
+    
+    # Helper function to scale vectors
+    scale_vec <- function(x) {
+      x <- as.numeric(x)
+      if (scale_method == "zscore") {
+        # Z-score standardization
+        s <- stats::sd(x, na.rm = TRUE)
+        if (is.na(s) || s == 0) return(rep(NA_real_, length(x)))
+        (x - mean(x, na.rm = TRUE)) / s
+      } else {
+        # Min-Max scaling
+        rng <- range(x, na.rm = TRUE)
+        if (any(!is.finite(rng)) || rng[1] == rng[2]) return(rep(NA_real_, length(x)))
+        (x - rng[1]) / (rng[2] - rng[1])
+      }
     }
     
-    tmp$Revenue_scaled <- scale_vec(tmp$Revenue)
-    tmp$X_scaled <- scale_vec(tmp$X)
+    # Determine grid layout
+    if (is.null(ncol)) {
+      k <- length(cols)
+      ncol <- if (k <= 2) 1 else if (k <= 4) 2 else if (k <= 9) 3 else 4
+    }
     
-    long_df <- rbind(
-      data.frame(Date = tmp$Date, Series = "Revenue", Value = tmp$Revenue_scaled),
-      data.frame(Date = tmp$Date, Series = xcol,      Value = tmp$X_scaled)
-    )
+    # Generate plots for each column
+    plots <- lapply(cols, function(xcol) {
+      tmp <- df[, c(date_col, revenue_col, xcol), drop = FALSE]
+      names(tmp) <- c("Date", "Revenue", "X")
+      
+      tmp$Revenue <- as.numeric(tmp$Revenue)
+      tmp$X <- as.numeric(tmp$X)
+      
+      # Filter NAs if requested
+      if (drop_na) {
+        tmp <- tmp[is.finite(tmp$Revenue) & is.finite(tmp$X) & !is.na(tmp$Date), , drop = FALSE]
+      } else {
+        tmp <- tmp[!is.na(tmp$Date), , drop = FALSE]
+      }
+      
+      # Apply scaling
+      tmp$Revenue_scaled <- scale_vec(tmp$Revenue)
+      tmp$X_scaled <- scale_vec(tmp$X)
+      
+      # Create long format for ggplot
+      long_df <- rbind(
+        data.frame(Date = tmp$Date, Series = "Revenue", Value = tmp$Revenue_scaled),
+        data.frame(Date = tmp$Date, Series = xcol,      Value = tmp$X_scaled)
+      )
+      
+      # Plot
+      ggplot2::ggplot(long_df, ggplot2::aes(x = Date, y = Value, group = Series, linetype = Series)) +
+        ggplot2::geom_line() +
+        ggplot2::labs(
+          title = paste0("Revenue vs ", xcol),
+          x = date_col,
+          y = if (scale_method == "zscore")
+            "z-score (mean=0, sd=1)"
+          else
+            "min-max scaled (0-1)"
+        ) +
+        ggplot2::theme_minimal()
+    })
     
-    ggplot2::ggplot(long_df, ggplot2::aes(x = Date, y = Value, group = Series, linetype = Series)) +
-      ggplot2::geom_line() +
-      ggplot2::labs(
-        title = paste0("Revenue vs ", xcol),
-        x = date_col,
-        y = if (scale_method == "zscore")
-          "z-score (mean=0, sd=1)"
-        else
-          "min-max scaled (0-1)"
-      ) +
-      ggplot2::theme_minimal()
+    # Combine plots using patchwork
+    combined <- patchwork::wrap_plots(plots, ncol = ncol)
+    
+    # Save if path provided
+    if (!is.null(save_path)) {
+      ggplot2::ggsave(save_path, combined, width = width, height = height, dpi = dpi)
+    }
+    
+    print(combined)
+    invisible(combined)
+    
+  }, error = function(e) {
+    message("Error in plotter: ", e$message)
+    invisible(NULL)
   })
-  
-  combined <- patchwork::wrap_plots(plots, ncol = ncol)
-  
-  if (!is.null(save_path)) {
-    ggplot2::ggsave(save_path, combined, width = width, height = height, dpi = dpi)
-  }
-  
-  print(combined)
-  invisible(combined)
 }
