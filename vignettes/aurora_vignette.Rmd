@@ -22,7 +22,7 @@ The `aurora` package allows you to easily fetch and align disparate data sources
 ## Usage
 
 ```{r setup}
-source('aurora.R')
+source('../R/aurora.R')
 ```
 
 ### Fetching Data
@@ -46,7 +46,7 @@ Once you have the data, you can easily add your revenue column to the dataframe.
 
 ```{r rev}
 
-rev_data <- revenue_merge(data,"revenue_data_2025.csv")
+rev_data <- revenue_merge(data,"../Scripts/revenue_data_2025.csv")
 head(rev_data)
 
 ```

@@ -362,7 +362,7 @@ daily timeline.</p>
 </div>
 <div id="usage" class="section level2">
 <h2>Usage</h2>
-<pre class="r"><code>source(&#39;aurora.R&#39;)</code></pre>
+<pre class="r"><code>source(&#39;../R/aurora.R&#39;)</code></pre>
 <div id="fetching-data" class="section level3">
 <h3>Fetching Data</h3>
 <p>You can fetch a comprehensive dataset for a specific location and
@@ -401,7 +401,7 @@ head(data)</code></pre>
 <h3>Add revenue to dataframe</h3>
 <p>Once you have the data, you can easily add your revenue column to the
 dataframe.</p>
-<pre class="r"><code>rev_data &lt;- revenue_merge(data,&quot;revenue_data_2025.csv&quot;)
+<pre class="r"><code>rev_data &lt;- revenue_merge(data,&quot;../Scripts/revenue_data_2025.csv&quot;)
 head(rev_data)</code></pre>
 <pre><code>##         DATE avg_temp max_temp tot_rain natural_disaster_score
 ## 1 2025-01-01      6.9      7.8     14.9                -1.6385
