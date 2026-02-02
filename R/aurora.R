@@ -266,16 +266,19 @@ revenue_merge <- function(input_df, csv_path) {
   # Input validation
   if (!is.data.frame(input_df)) stop("input_df must be a data frame.")
   if (!file.exists(csv_path)) stop("CSV path does not exist: ", csv_path)
+  # Check for required columns immediately
+  if (!"DATE" %in% names(input_df)) stop("Input dataframe must contain 'DATE' column")
+  
+  # Read the revenue CSV (outside tryCatch to fail fast)
+  csv_df <- tryCatch({
+    utils::read.csv(csv_path, stringsAsFactors = FALSE)
+  }, error = function(e) {
+    stop("Failed to read CSV: ", e$message)
+  })
+
+  if (!"Date" %in% names(csv_df)) stop("CSV file must contain 'Date' column")
   
   result <- tryCatch({
-    
-    # Read the revenue CSV
-    csv_df <- utils::read.csv(csv_path, stringsAsFactors = FALSE)
-    
-    # Check for required columns
-    if (!"DATE" %in% names(input_df)) stop("Input dataframe must contain 'DATE' column")
-    if (!"Date" %in% names(csv_df)) stop("CSV file must contain 'Date' column")
-    
     # Standardize Date columns
     input_df$Date <- as.Date(input_df$DATE)
     csv_df$Date   <- as.Date(csv_df$Date)
@@ -328,14 +331,14 @@ plotter <- function(df,
   if (!requireNamespace("ggplot2", quietly = TRUE)) stop("Install ggplot2: install.packages('ggplot2')")
   if (!requireNamespace("patchwork", quietly = TRUE)) stop("Install patchwork: install.packages('patchwork')")
   
+  # Validate inputs BEFORE tryCatch so tests can catch expected errors
+  if (!date_col %in% names(df)) stop(paste0("Missing date column: ", date_col))
+  if (!revenue_col %in% names(df)) stop(paste0("Missing revenue column: ", revenue_col))
+  
+  missing_cols <- setdiff(cols, names(df))
+  if (length(missing_cols) > 0) stop(paste("These columns are missing:", paste(missing_cols, collapse = ", ")))
+  
   tryCatch({
-    
-    # Check for required columns in dataframe
-    if (!date_col %in% names(df)) stop(paste0("Missing date column: ", date_col))
-    if (!revenue_col %in% names(df)) stop(paste0("Missing revenue column: ", revenue_col))
-    
-    missing_cols <- setdiff(cols, names(df))
-    if (length(missing_cols) > 0) stop(paste("These columns are missing:", paste(missing_cols, collapse = ", ")))
     
     # Prepare data: convert date and sort
     df[[date_col]] <- as.Date(df[[date_col]])
