@@ -41,6 +41,29 @@ Development responsibilities were distributed across the team as follows:
 
 ---
 
+## Workflow Order
+
+The development process followed this sequential order:
+
+1. Initial development of core API wrapper
+2. Merging of three API wrappers
+3. Integration of wrappers into a unified main function
+4. Orchestration of Aurora functions
+5. Error handling across primary functions
+6. Git repository structure and file organization
+7. Unit and integration test implementation
+8. Inline code commenting
+9. Documentation using Roxygen2
+10. Vignette preparation
+11. Development of revenue integration function
+12. Development of correlation plotting function
+13. Error handling for analytical functions
+14. GitHub Actions CI/CD pipeline
+15. README updates and maintenance
+16. CRAN package setup and submission preparation  
+
+---
+
 ## Team Workflow Practices
 
 To ensure consistent collaboration and equal contribution, the team followed these workflow standards:
