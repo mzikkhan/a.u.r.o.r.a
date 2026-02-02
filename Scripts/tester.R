@@ -1,4 +1,5 @@
-setwd("C:/Users/ckart/Desktop/MDS/DATA\ 534/a.u.r.o.r.a")
+
+# 1. File path
 source(file.path("R", "aurora.R"))
 
 # 2. Call the function with your specific inputs
@@ -13,7 +14,7 @@ my_analysis_data <- get_macroeconomic_data(
 head(my_analysis_data)
 
 # 4. Add Revenue
-rev_data <- revenue_merge(my_analysis_data,"revenue_data_2025.csv")
+rev_data <- revenue_merge(my_analysis_data,"Scripts/revenue_data_2025.csv")
 head(rev_data)
 
 # 5. Plotting
@@ -25,3 +26,4 @@ plotter(rev_data,
           revenue_col = "Revenue",
           ncol = 3,
           scale_method = "zscore")
+
