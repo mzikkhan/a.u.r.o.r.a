@@ -55,7 +55,7 @@ head(rev_data)
 
 You can generate plots of each feature vs revenue on given timeline for trend analysis.
 
-```{r plot, fig.width=12, fig.height=10}
+```{r plot, fig.width=14, fig.height=12}
 
 plots = c("avg_temp", "max_temp", "tot_rain", "natural_disaster_score", "political_unrest_score","interest_rate","mortgage_rate", "unemployment", "cpi_inflation","gdp", "public_debt")
 
