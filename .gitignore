@@ -5,3 +5,6 @@
 .Rproj.user/
 .Rhistory
 .RData
+
+# User requested ignore
+vignettes/
