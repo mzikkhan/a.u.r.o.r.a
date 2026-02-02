@@ -1,4 +1,4 @@
-# Contributing to Aurora
+# CONTRIBUTIONS
 
 This document outlines both our external contribution process and our internal team workflow.
 
@@ -76,6 +76,9 @@ To ensure consistent collaboration and equal contribution, the team followed the
   - `Zaed` for development branch.
   - `Ilakiya` for development branch.
   - `Karthik` for development branch.
+  - `Zaed_Two` for development branch.
+  - `KC` for development branch.
+  - `Testing` for testing branch. 
 
 
 ---
