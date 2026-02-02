@@ -1,10 +1,10 @@
-# Aurora Package
+# A.U.R.O.R.A
 
 ## Motivation
 
 Macroeconomic analysis often requires integrating multiple external data sources such as weather data, economic indicators, and global event sentiment data. These datasets are typically accessed through different APIs and data formats, making the data collection and preprocessing workflow time-consuming and error-prone.
 
-**Aurora** addresses this challenge by providing a unified interface that automatically fetches, processes, and integrates these datasets into a single, analysis-ready macroeconomic dataset. This allows data analysts to focus more on insight generation rather than data collection and preprocessing.
+**Aurora** (Analysis of Upstream Risks and Observed Regional Anomalies)addresses this challenge by providing a unified interface that automatically fetches, processes, and integrates these datasets into a single, analysis-ready macroeconomic dataset. This allows data analysts to focus more on insight generation rather than data collection and preprocessing.
 
 ## Data Sources
 
@@ -34,7 +34,7 @@ Here is an example of how to use the Aurora package to fetch data, merge it with
 source(file.path("R", "aurora.R"))
 
 # 2. Fetch Macroeconomic Data
-# Provide start/end dates and location coordinates (e.g., Copenhagen)
+# Provide start/end dates and location coordinates (e.g., Canada)
 my_analysis_data <- get_macroeconomic_data(
   start_date = "2025-01-01",
   end_date   = "2025-12-01",
