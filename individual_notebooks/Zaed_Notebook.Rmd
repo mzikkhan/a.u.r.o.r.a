@@ -201,6 +201,77 @@ https://github.com/mzikkhan/a.u.r.o.r.a/commit/95f63000dee06889c2eba38752980674d
 
 https://github.com/mzikkhan/a.u.r.o.r.a/commit/e52f2eda1ca692d43891a44c285f789f76f48237
 
+# 31-Jan-2026
+
+## Summary
+
+Today I focused on improving project usability and developer experience by refining documentation, reorganizing the repository, and enhancing core user-facing functions. I also coordinated with all my members, guiding my team members to take on specified tasks
+to work in parallel and complete the project on time - acting as the team leader.
+
+The goal of this work was to make the package easier to understand, contribute to, and use in real analytical workflows.
+
+I completed four key tasks:
+
+### README and Contributor Documentation
+
+I updated README.md to provide a clearer overview of the package purpose, 
+installation steps, core functionality, and example usage. This included outlining 
+the primary workflow for attaching macro-level data to revenue datasets 
+and demonstrating basic visualization capabilities.
+
+I also updated CONTRIBUTING.md to define contribution guidelines, 
+coding standards, testing expectations, and pull request procedures. 
+This establishes a consistent framework for collaboration and future development.
+
+### Repository Restructuring
+
+I reorganized the repository to better reflect professional R package conventions and improve navigability. This included:
+
+ - separating source code, documentation, tests, and vignettes into clearly defined directories
+
+ - removing redundant files
+
+ - standardizing naming across folders and scripts
+
+These changes improve maintainability and make it easier for new contributors to locate relevant components.
+
+### Updated Vignettes
+
+I revised the package vignettes to reflect the updated workflow and repository structure. The vignettes now walk users through:
+
+ - importing revenue data
+
+ - enriching it with macro-level features
+
+ - visualizing trends and relationships
+
+ - performing basic exploratory analysis
+
+These examples serve as practical, end-to-end demonstrations of the package’s intended use.
+
+### Updated Vignettes
+
+I added error-handling to the revenue_merge and plotter functions.
+
+## Role in the Larger Project
+
+This work strengthens the overall usability and professionalism of the package
+by improving documentation, clarifying workflows, and refining core functionality.
+
+Together, these updates make the project more approachable for both 
+end users and contributors, and support our broader objective of delivering 
+a production-ready R package that simplifies macro-contextual revenue analysis.
+
+Commit links:
+
+https://github.com/mzikkhan/a.u.r.o.r.a/tree/c101dc4c9c148340671e6f0a346c93972230af18
+
+https://github.com/mzikkhan/a.u.r.o.r.a/tree/2c06fcebfded0475b29ab166e4014ac3b61794bd
+
+https://github.com/mzikkhan/a.u.r.o.r.a/tree/93ea12ee03256fe2a5b94c3633d33fd66618057e
+
+https://github.com/mzikkhan/a.u.r.o.r.a/tree/f6df28740c0428fde66d29e012d10a823acb9b09
+
 
 
 
