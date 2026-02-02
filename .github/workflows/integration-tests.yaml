@@ -1,0 +1,31 @@
+name: Integration-tests
+
+on:
+  workflow_dispatch: {}     # manual button in GitHub Actions tab
+  schedule:
+    - cron: "0 9 * * 1"     # every Monday 09:00 UTC (optional)
+
+jobs:
+  integration:
+    runs-on: ubuntu-latest
+
+    env:
+      RUN_INTEGRATION: "true"
+      NOT_CRAN: true
+      # FRED key from GitHub Secrets
+      FRED_API_KEY: ${{ secrets.FRED_API_KEY }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: r-lib/actions/setup-r@v2
+        with:
+          use-public-rspm: true
+
+      - uses: r-lib/actions/setup-r-dependencies@v2
+        with:
+          extra-packages: any::devtools any::testthat
+          needs: check
+
+      - name: Run integration tests
+        run: R -q -e "devtools::test()"
