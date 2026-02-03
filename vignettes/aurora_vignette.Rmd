@@ -22,7 +22,7 @@ The `aurora` package allows you to easily fetch and align disparate data sources
 ## Usage
 
 ```{r setup}
-source('../R/aurora.R')
+library(aurora)
 ```
 
 ### Fetching Data
