@@ -80,8 +80,8 @@ The `plotter()` function is used to plot the macro date and the revenue data to 
 - Created github secret tokens to initialize API Keys as Environmental Variables.
 - Created .yaml files for Continuous Integration through Github Actions. (.github\\workflows\\).
 
-## 2nd Feb
-
+## 2nd Feb 
+           
 - Resolved Github Conflicts and Errors in Continuous Integration.
 - Wrapped up final changes and updates for package deployment.
 
