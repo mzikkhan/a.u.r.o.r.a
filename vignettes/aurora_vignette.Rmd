@@ -17,7 +17,17 @@ knitr::opts_chunk$set(
 
 ## Introduction
 
+The `aurora` package allows you to easily fetch and align disparate data sources—weather, economics, and events—into a single daily timeline.
+
+## Usage
+
+```{r setup}
 source('../R/aurora.R')
+```
+
+### Fetching Data
+
+You can fetch a comprehensive dataset for a specific location and date range. Here we look at Ottawa, Canada for 1st January, 2025 to 1st December, 2025.
 
 ```{r fetch}
 # Fetches data from Open-Meteo, FRED, and GDELT
