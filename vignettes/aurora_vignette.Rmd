@@ -30,6 +30,8 @@ source('../R/aurora.R')
 You can fetch a comprehensive dataset for a specific location and date range. Here we look at Ottawa, Canada for 1st January, 2025 to 1st December, 2025.
 
 ```{r fetch}
+
+
 # Fetches data from Open-Meteo, FRED, and GDELT
 data <- get_macroeconomic_data(
   start_date = "2025-01-01",
