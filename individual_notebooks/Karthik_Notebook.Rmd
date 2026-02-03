@@ -1,5 +1,5 @@
 ---
-title: "DATA534: Project Proposal"
+title: "DATA534: Project Notebook"
 author: "Karthik Chandran"
 output:
   pdf_document:
@@ -72,7 +72,7 @@ The `plotter()` function is used to plot the macro date and the revenue data to 
 - **scale_method** (Scaling Method used to plot Macro and Revenue - `zscore`, `minmax`)
 - **drop_na** (if True drops all the NA values from the Dateframe)
 
-## 1st Jan
+## 1st Feb
 
 - Tested and Error Handled for the functions **revenue_merge()** and **plotter** (R\\aurora.R\\).
 - Performed Unit Testing and Integration Testing in R for all 6 functions (tests\\testthat\\).
@@ -80,7 +80,7 @@ The `plotter()` function is used to plot the macro date and the revenue data to 
 - Created github secret tokens to initialize API Keys as Environmental Variables.
 - Created .yaml files for Continuous Integration through Github Actions. (.github\\workflows\\).
 
-## 2nd Jan
+## 2nd Feb
 
 - Resolved Github Conflicts and Errors in Continuous Integration.
 - Wrapped up final changes and updates for package deployment.

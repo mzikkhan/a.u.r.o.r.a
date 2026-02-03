@@ -18,32 +18,6 @@ plotter(
   drop_na = TRUE
 )
 }
-\arguments{
-\item{df}{data.frame. Input dataset.}
-
-\item{cols}{Character vector. Columns to plot against revenue.}
-
-\item{date_col}{Character. Name of date column in df.}
-
-\item{revenue_col}{Character. Name of revenue column in df.}
-
-\item{ncol}{Integer. Number of columns in the plot grid.}
-
-\item{save_path}{Character or NULL. If not NULL, file path to save plot.}
-
-\item{width}{Numeric. Width for ggsave (inches).}
-
-\item{height}{Numeric. Height for ggsave (inches).}
-
-\item{dpi}{Integer. DPI for ggsave.}
-
-\item{scale_method}{Character. "zscore" or "minmax".}
-
-\item{drop_na}{Logical. Drop non-finite rows before plotting.}
-}
-\value{
-A patchwork object (invisibly).
-}
 \description{
 Plot revenue vs selected variables with scaling
 }
