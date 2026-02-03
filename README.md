@@ -52,7 +52,7 @@ Aurora integrates data from the following external sources:
 
 ## Usage
 
-Here is an example of how to use the Aurora package to fetch data, merge it with revenue, and visualize the results.
+Here is an example of how to use the AURORA package to fetch data, merge it with revenue, and visualize the results.
 
 ```r
 # 1. Load the package
