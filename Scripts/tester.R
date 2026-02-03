@@ -2,6 +2,8 @@
 # 1. File path
 source("R/aurora.R")
 
+Sys.setenv(FRED_API_KEY = "1f52a3bcb927a3a2423a9a2e78bd1261")
+
 # 2. Call the function with your specific inputs
 my_analysis_data <- get_macroeconomic_data(
   start_date = "2025-01-01",
@@ -26,73 +28,3 @@ plotter(rev_data,
           revenue_col = "Revenue",
           ncol = 3,
           scale_method = "zscore")
-
----
-title: "Analyzing Macroeconomic Trends with Aurora"
-output: rmarkdown::html_document
-vignette: >
-  %\VignetteIndexEntry{Analyzing Macroeconomic Trends with Aurora}
-  %\VignetteEngine{knitr::rmarkdown}
-  %\VignetteEncoding{UTF-8}
----
-
-```{r, include = FALSE}
-knitr::opts_chunk$set(
-  echo = TRUE,
-  message = FALSE,
-  warning = FALSE
-)
-```
-
-## Introduction
-
-The `aurora` package allows you to easily fetch and align disparate data sources—weather, economics, and events—into a single daily timeline.
-
-## Usage
-
-```{r setup}
-library(aurora)
-```
-
-### Fetching Data
-
-You can fetch a comprehensive dataset for a specific location and date range. Here we look at Ottawa, Canada for January 2024.
-
-```{r fetch}
-# Fetches data from Open-Meteo, FRED, and GDELT
-data <- get_macroeconomic_data(
-  start_date = "2025-01-01",
-  end_date   = "2025-12-01",
-  latitude   = 55.6761, 
-  longitude  = 12.5683
-)
-head(data)
-```
-
-### Add revenue to dataframe
-
-Once you have the data, you can easily add your revenue column to the dataframe.
-
-```{r rev}
-
-rev_data <- revenue_merge(data,"../Scripts/revenue_data_2025.csv")
-head(rev_data)
-
-```
-
-### Generate plots
-
-You can generate plots of each feature vs revenue on given timeline for trend analysis.
-
-```{r plot, fig.width=12, fig.height=10}
-
-plots = c("avg_temp", "max_temp", "tot_rain", "natural_disaster_score", "political_unrest_score","interest_rate","mortgage_rate", "unemployment", "cpi_inflation","gdp", "public_debt")
-
-plotter(rev_data,
-          cols = plots,
-          date_col = "Date",
-          revenue_col = "Revenue",
-          ncol = 3,
-          scale_method = "zscore")
-
-```
