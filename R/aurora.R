@@ -11,7 +11,18 @@
 #' @param lat Numeric. Latitude.
 #' @param lon Numeric. Longitude.
 #'
-#' @return A data.frame with columns: date, avg_temp, max_temp, tot_rain.
+#' @importFrom utils read.csv
+#' @importFrom dplyr summarise group_by left_join
+#' @examples
+#' \dontrun{
+#'   weather <- get_daily_weather(
+#'     start = "2025-01-01",
+#'     end = "2025-01-15",
+#'     lat = 51.5074,
+#'     lon = -0.1278
+#'   )
+#'   head(weather)
+#' }
 #' @export
 
 get_daily_weather <- function(start, end, lat, lon) {
@@ -79,6 +90,23 @@ get_daily_weather <- function(start, end, lat, lon) {
 #'
 #' @return A data.frame with columns: date and economic indicators
 #'   (interest_rate, mortgage_rate, unemployment, cpi_inflation, gdp, public_debt).
+#' @importFrom purrr map_dfr
+#' @importFrom fredr fredr_set_key fredr
+#' @importFrom dplyr select arrange left_join mutate across rename_with
+#' @importFrom tidyr pivot_wider
+#' @importFrom zoo na.locf
+#' @examples
+#' \dontrun{
+#'   # Requires a FRED API key set as an environment variable
+#'   # Sys.setenv(FRED_API_KEY = "your_key_here")
+#'   econ <- get_daily_economic_data(
+#'     start = "2025-01-01",
+#'     end = "2025-01-15",
+#'     lat = 51.5074,
+#'     lon = -0.1278
+#'   )
+#'   head(econ)
+#' }
 #' @export
 
 get_daily_economic_data <- function(start, end, lat, lon) {
@@ -148,6 +176,18 @@ get_daily_economic_data <- function(start, end, lat, lon) {
 #' @param end Character. End date in "YYYY-MM-DD".
 #'
 #' @return A data.frame with columns: date and the score column.
+#' @importFrom utils URLencode read.csv
+#' @importFrom dplyr transmute group_by summarise left_join
+#' @examples
+#' \dontrun{
+#'   gdelt <- gdelt_timeline_daily(
+#'     query_text = '(protest OR unrest) sourcecountry:CA',
+#'     out_col = "unrest_score",
+#'     start = "2025-01-01",
+#'     end = "2025-01-15"
+#'   )
+#'   head(gdelt)
+#' }
 #' @export
 
 gdelt_timeline_daily <- function(query_text, out_col, start, end) {
@@ -211,6 +251,19 @@ gdelt_timeline_daily <- function(query_text, out_col, start, end) {
 #' @param gdelt_fun Function. GDELT fetcher (default: gdelt_timeline_daily).
 #'
 #' @return A data.frame with DATE and merged feature columns.
+#' @importFrom dplyr left_join select
+#' @examples
+#' \dontrun{
+#'   # Combines data from all three APIs
+#'   # Requires FRED_API_KEY to be set
+#'   macro_data <- get_macroeconomic_data(
+#'     start_date = "2025-01-01",
+#'     end_date = "2025-01-15",
+#'     latitude = 55.6761,
+#'     longitude = 12.5683
+#'   )
+#'   head(macro_data)
+#' }
 #' @export
 
 get_macroeconomic_data <- function(start_date, end_date, latitude, longitude,
@@ -259,6 +312,14 @@ get_macroeconomic_data <- function(start_date, end_date, latitude, longitude,
 #' @param csv_path Character. Path to CSV with a Date column.
 #'
 #' @return A merged data.frame (inner join) on Date.
+#' @importFrom utils read.csv
+#' @importFrom dplyr inner_join
+#' @examples
+#' \dontrun{
+#'   # Assume macro_data generated from get_macroeconomic_data()
+#'   # and a CSV file "revenue.csv" with a "Date" column exists
+#'   merged_data <- revenue_merge(macro_data, "revenue.csv")
+#' }
 #' @export
 
 revenue_merge <- function(input_df, csv_path) {
@@ -312,6 +373,20 @@ revenue_merge <- function(input_df, csv_path) {
 #' @param drop_na Logical. Drop non-finite rows before plotting.
 #'
 #' @return A patchwork object (invisibly).
+#' @importFrom stats sd
+#' @importFrom ggplot2 ggplot aes geom_line labs theme_minimal ggsave
+#' @importFrom patchwork wrap_plots
+#' @examples
+#' \dontrun{
+#'   # Assuming 'merged_data' exists containing Revenue, Date, and avg_temp
+#'   plotter(
+#'     df = merged_data,
+#'     cols = c("avg_temp", "gdp"),
+#'     date_col = "Date",
+#'     revenue_col = "Revenue",
+#'     scale_method = "zscore"
+#'   )
+#' }
 #' @export
 
 plotter <- function(df,

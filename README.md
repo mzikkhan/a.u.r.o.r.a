@@ -1,6 +1,10 @@
 # A.U.R.O.R.A
 
+<!-- badges: start -->
 [![R-CMD-check](https://github.com/mzikkhan/a.u.r.o.r.a/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/mzikkhan/a.u.r.o.r.a/actions/workflows/R-CMD-check.yaml)
+<!-- badges: end -->
+
+> A.U.R.O.R.A is an R package that seamlessly integrates weather, economic, and global‑event data into a unified macro‑economic dataset for easy analysis and visualization.
 
 ## Motivation
 
@@ -91,6 +95,10 @@ plotter(rev_data,
         ncol = 3,
         scale_method = "zscore")
 ```
+
+## Error Handling
+
+A.U.R.O.R.A is designed with robust error handling to ensure reliability during API communication. If an external data source is temporarily unavailable or returns an error, A.U.R.O.R.A gracefully handles the failure by returning missing values (NA) instead of interrupting execution. This ensures downstream workflows remain stable.
 
 ## License
 

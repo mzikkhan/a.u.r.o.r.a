@@ -17,3 +17,10 @@ A merged data.frame (inner join) on Date.
 \description{
 Merge macro dataset with revenue CSV by Date
 }
+\examples{
+\dontrun{
+  # Assume macro_data generated from get_macroeconomic_data()
+  # and a CSV file "revenue.csv" with a "Date" column exists
+  merged_data <- revenue_merge(macro_data, "revenue.csv")
+}
+}

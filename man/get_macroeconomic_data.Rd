@@ -35,3 +35,16 @@ A data.frame with DATE and merged feature columns.
 \description{
 Merge weather, economic, and GDELT features into one macro dataset
 }
+\examples{
+\dontrun{
+  # Combines data from all three APIs
+  # Requires FRED_API_KEY to be set
+  macro_data <- get_macroeconomic_data(
+    start_date = "2025-01-01",
+    end_date = "2025-01-15",
+    latitude = 55.6761,
+    longitude = 12.5683
+  )
+  head(macro_data)
+}
+}

@@ -15,9 +15,17 @@ get_daily_weather(start, end, lat, lon)
 
 \item{lon}{Numeric. Longitude.}
 }
-\value{
-A data.frame with columns: date, avg_temp, max_temp, tot_rain.
-}
 \description{
 Get daily weather summary from Open-Meteo archive API
+}
+\examples{
+\dontrun{
+  weather <- get_daily_weather(
+    start = "2025-01-01",
+    end = "2025-01-15",
+    lat = 51.5074,
+    lon = -0.1278
+  )
+  head(weather)
+}
 }

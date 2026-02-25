@@ -22,3 +22,16 @@ A data.frame with columns: date and economic indicators
 \description{
 Get daily economic indicators from FRED aligned to a daily date spine
 }
+\examples{
+\dontrun{
+  # Requires a FRED API key set as an environment variable
+  # Sys.setenv(FRED_API_KEY = "your_key_here")
+  econ <- get_daily_economic_data(
+    start = "2025-01-01",
+    end = "2025-01-15",
+    lat = 51.5074,
+    lon = -0.1278
+  )
+  head(econ)
+}
+}

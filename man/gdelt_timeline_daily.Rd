@@ -21,3 +21,14 @@ A data.frame with columns: date and the score column.
 \description{
 Get a daily GDELT TimelineTone score and align to a date spine
 }
+\examples{
+\dontrun{
+  gdelt <- gdelt_timeline_daily(
+    query_text = '(protest OR unrest) sourcecountry:CA',
+    out_col = "unrest_score",
+    start = "2025-01-01",
+    end = "2025-01-15"
+  )
+  head(gdelt)
+}
+}
