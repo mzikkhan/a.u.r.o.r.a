@@ -10,10 +10,11 @@ Macroeconomic analysis often requires integrating multiple external data sources
 
 ## Installation
 
-You can install the package directly with:
+You can install the development version of the package from GitHub with:
 
 ```r
-install.packages('aurora')
+# install.packages("devtools")
+devtools::install_github("mzikkhan/a.u.r.o.r.a")
 ```
 
 ## Configuration
@@ -90,10 +91,6 @@ plotter(rev_data,
         ncol = 3,
         scale_method = "zscore")
 ```
-
-## Error Handling
-
-Aurora is designed with robust error handling to ensure reliability during API communication. If an external data source is temporarily unavailable or returns an error, Aurora gracefully handles the failure by returning missing values (NA) instead of interrupting execution. This ensures downstream workflows remain stable.
 
 ## License
 
