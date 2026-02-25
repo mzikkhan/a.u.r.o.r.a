@@ -2,8 +2,6 @@
 # 1. File path
 source("R/aurora.R")
 
-Sys.setenv(FRED_API_KEY = "1f52a3bcb927a3a2423a9a2e78bd1261")
-
 # 2. Call the function with your specific inputs
 my_analysis_data <- get_macroeconomic_data(
   start_date = "2025-01-01",
@@ -22,9 +20,19 @@ head(rev_data)
 # 5. Plotting
 plots = c("avg_temp", "max_temp", "tot_rain", "natural_disaster_score", "political_unrest_score","interest_rate","mortgage_rate", "unemployment", "cpi_inflation","gdp", "public_debt")
 
+plots = c("avg_temp", "max_temp", "tot_rain", "natural_disaster_score", "political_unrest_score","interest_rate")
+
 plotter(rev_data,
           cols = plots,
           date_col = "Date",
           revenue_col = "Revenue",
           ncol = 3,
           scale_method = "zscore")
+
+
+
+
+
+
+
+
